@@ -4,6 +4,7 @@ import pickle
 import preprocessing
 import feature_extraction
 import train_svm
+import numpy as np
 
 # Check for existing model.
 try:
@@ -66,10 +67,24 @@ except OSError:
 
 print("Training classifier...")
 
-clf = train_svm.train_classifier(X, y, X_val, y_val, max_iter=2000)
+clf = train_svm.train_classifier(X, y, X_val, y_val, max_iter=1000)
 with open("clf", "wb") as fd:
     pickle.dump(clf, fd)
 
-print("Support Vector classifier successfully trained.")
-accuracy = clf.score(X_test, y_test)
-print(f"Spam classification accuracy: {accuracy * 100:.2f}%")
+print("\nSupport Vector classifier successfully trained.\n")
+predictions = clf.predict(X_test)
+ground_truth = np.ravel(y_test)
+
+tp = np.sum(ground_truth == predictions)
+fp = np.sum(ground_truth * np.logical_not(predictions))
+fn = np.sum(np.logical_not(predictions) * predictions)
+
+precision = tp / (tp + fp)
+recall = tp / (tp + fn)
+f1_score = 2 * (precision * recall) / (precision + recall)
+accuracy = (np.sum(ground_truth == predictions) / len(ground_truth)) * 100
+
+print(f"Accuracy: {accuracy:.2f}%")
+print(f"Precision: {precision}")
+print(f"Recall: {recall}")
+print(f"F1 score: {f1_score}")
