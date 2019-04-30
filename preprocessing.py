@@ -26,12 +26,12 @@ def parse_email(data):
     return data
 
 
-def preprocess_data(data_dir, count_words=False, treshold=100):
-    print(f"Preprocessing emails in {data_dir}...")
+def preprocess_dir(dir_name, count_words=False, treshold=100):
+    print(f"Preprocessing emails in {dir_name}...")
     if count_words:
         word_count = collections.Counter()
-    for f in os.listdir(data_dir):
-        with open(data_dir + f, "r") as rfd:
+    for f in os.listdir(dir_name):
+        with open(dir_name + f, "r") as rfd:
             try:
                 data = email.parser.Parser().parse(rfd)
                 body = data
@@ -41,18 +41,31 @@ def preprocess_data(data_dir, count_words=False, treshold=100):
                     body = body.get_payload()[0]
                 body = body.get_payload()
                 words = parse_email(body)
-                with open(f"{data_dir}{f}_parsed", "w") as wfd:
+                with open(f"{dir_name}{f}_parsed", "w") as wfd:
                     for word in words:
                         wfd.write(f"{word} ")
                 if count_words:
                     word_count.update(words)
-                os.remove(data_dir + f)
+                os.remove(dir_name + f)
             except UnicodeDecodeError:
                 # We only look at utf-8 formatted email.
-                os.remove(data_dir + f)
+                os.remove(dir_name + f)
     if count_words:
         return {word: cnt for word, cnt in word_count.items() if cnt >=
                 treshold}
+
+
+def preprocess_file(filename):
+    with open(filename, "r") as rfd:
+        try:
+            data = email.parser.Parser().parse(rfd)
+            body = data
+            while body.is_multipart():
+                body = body.get_payload()[0]
+            body = body.get_payload()
+            return parse_email(body)
+        except UnicodeDecodeError:
+            return None
 
 
 # Necessary nltk package for tokenization.
