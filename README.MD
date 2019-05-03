@@ -1,4 +1,4 @@
-#svm-spam-filter
+# svm-spam-filter
 
 A python implementation of a simple spam classifier using support-vector
 machines. Requires python3.6+ to run.
@@ -22,4 +22,5 @@ To classify your own emails (after you have trained the classifier), run the fol
 python3 predict.py FILE
 ``
 
+Where FILE contains the source code of the email you want to classify.
 
